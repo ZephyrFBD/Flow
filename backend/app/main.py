@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from app.routers import knowledge, questions, project, config as config_router
 from app.services.llm_service import LLMService
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 @asynccontextmanager
