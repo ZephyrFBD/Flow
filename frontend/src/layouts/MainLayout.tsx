@@ -18,7 +18,7 @@ export default function MainLayout() {
   const { token } = theme.useToken();
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: token.colorBgLayout }}>
       <Header
         style={{
           display: 'flex',
