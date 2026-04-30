@@ -149,9 +149,9 @@ source venv/Scripts/activate
 # 安装依赖
 pip install -r requirements.txt
 
-# 配置环境变量
+# (可选) 配置环境变量作为默认值
 cp .env.example .env
-# 编辑 .env，填入你的 API Key
+# 也可通过 Settings 页面在运行时配置
 
 # 启动服务
 uvicorn app.main:app --reload --port 8000
