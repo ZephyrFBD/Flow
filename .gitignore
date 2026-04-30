@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+*.egg
+
+# Environment variables
+.env
+backend/.env
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Build
+frontend/dist/
+frontend/build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data
+*.knowtree
+knowtree_data/
+backend/knowtree_data/
+backend/data/
+
+# Logs
+*.log
+backend.log
+vite.log
+
+# Temp
+practice_q1.png
+snap_*.txt
+snap_gen*.txt
