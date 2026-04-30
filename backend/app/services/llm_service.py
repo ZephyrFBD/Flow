@@ -1,11 +1,15 @@
 """LLM service — provider registry, routing, and configuration management."""
 import os
+from pathlib import Path
 from typing import Optional
+from dotenv import set_key
 from app.config import AppConfig, LLMProviderConfig
 from app.core.llm.base import BaseLLM
 from app.core.llm.openai_llm import OpenAILLM
 from app.core.llm.claude_llm import ClaudeLLM
 from app.core.llm.ollama_llm import OllamaLLM
+
+_ENV_FILE = Path(__file__).resolve().parent.parent.parent / ".env"
 
 
 class LLMService:
@@ -94,14 +98,22 @@ class LLMService:
             self._providers[provider] = OpenAILLM(
                 api_key=cfg.api_key, base_url=cfg.base_url, model=cfg.model
             )
+            _set_env("OPENAI_API_KEY", cfg.api_key)
+            _set_env("OPENAI_BASE_URL", cfg.base_url)
+            _set_env("OPENAI_MODEL", cfg.model)
         elif provider == "claude":
             self._providers[provider] = ClaudeLLM(
                 api_key=cfg.api_key, base_url=cfg.base_url, model=cfg.model
             )
+            _set_env("ANTHROPIC_API_KEY", cfg.api_key)
+            _set_env("ANTHROPIC_BASE_URL", cfg.base_url)
+            _set_env("ANTHROPIC_MODEL", cfg.model)
         elif provider == "ollama":
             self._providers[provider] = OllamaLLM(
                 base_url=cfg.base_url, model=cfg.model
             )
+            _set_env("OLLAMA_BASE_URL", cfg.base_url)
+            _set_env("OLLAMA_MODEL", cfg.model)
 
     async def get_providers_status(self) -> dict:
         """Get status of all providers."""
@@ -114,6 +126,11 @@ class LLMService:
                 "active": name == self._config.active_provider,
             }
         return status
+
+    def update_active_provider(self, name: str):
+        """Persist active provider switch to .env."""
+        self.set_active_provider(name)
+        _set_env("DEFAULT_LLM_PROVIDER", name)
 
     def get_config(self) -> dict:
         """Get current full configuration (without API keys)."""
@@ -137,3 +154,10 @@ class LLMService:
                 },
             },
         }
+
+def _set_env(key: str, value: str):
+    """Persist a config value to the .env file."""
+    try:
+        set_key(str(_ENV_FILE), key, value)
+    except Exception:
+        pass  # best-effort

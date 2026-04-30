@@ -25,7 +25,7 @@ async def set_active_provider(body: ActiveProviderUpdate):
     """Switch the active LLM provider."""
     llm = LLMService.get_instance()
     try:
-        llm.set_active_provider(body.provider)
+        llm.update_active_provider(body.provider)
         return {"status": "ok", "active_provider": body.provider}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
