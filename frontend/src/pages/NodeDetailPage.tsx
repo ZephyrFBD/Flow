@@ -18,8 +18,26 @@ import StarBorder from '../components/StarBorder';
 const { Text } = Typography;
 
 const EXAMPLE_DIAGRAMS: Record<string, string> = {
-  '矩阵': 'graph LR\n  A[矩阵] --> B[加法]\n  A --> C[乘法]\n  A --> D[转置]\n  B --> E[对应元素相加]\n  C --> F[行×列]',
-  '线性代数': 'graph TD\n  A[线性代数] --> B[矩阵运算]\n  A --> C[行列式]\n  A --> D[特征值]\n  A --> E[向量空间]',
+  '矩阵': `flowchart LR
+    A[矩阵] --> B[加法]
+    A --> C[乘法]
+    A --> D[转置]`,
+  '行列式': `flowchart LR
+    A[行列式] --> B[定义]
+    A --> C[性质]
+    A --> D[计算]
+    C --> E[克拉默法则]`,
+  '特征值': `flowchart TD
+    A[特征值] --> B[特征多项式]
+    A --> C[特征向量]
+    B --> D[求解特征值]
+    C --> E[求解特征向量]
+    D --> F[矩阵对角化]`,
+  '线性代数': `flowchart TD
+    A[线性代数] --> B[矩阵运算]
+    A --> C[行列式]
+    A --> D[特征值]
+    A --> E[向量空间]`,
 };
 
 export default function NodeDetailPage() {

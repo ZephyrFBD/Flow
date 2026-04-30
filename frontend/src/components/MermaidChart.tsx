@@ -3,9 +3,7 @@ import mermaid from 'mermaid';
 
 mermaid.initialize({
   theme: 'neutral',
-  themeVariables: {
-    fontSize: '14px',
-  },
+  themeVariables: { fontSize: '14px' },
   startOnLoad: false,
 });
 
@@ -18,11 +16,12 @@ export default function MermaidChart({ chart }: Props) {
 
   useEffect(() => {
     if (!ref.current || !chart) return;
-    const id = `mermaid-${Math.random().toString(36).slice(2, 8)}`;
-    mermaid.render(id, chart).then(({ svg }) => {
-      if (ref.current) ref.current.innerHTML = svg;
-    }).catch(() => {
-      if (ref.current) ref.current.innerHTML = '<p style="color:#999">图表示例加载失败</p>';
+    const el = ref.current;
+    el.innerHTML = `<div class="mermaid">${chart.replace(/</g, '&lt;')}</div>`;
+    const target = el.firstElementChild as HTMLElement;
+    if (!target) return;
+    mermaid.run({ nodes: [target], suppressErrors: true }).catch(() => {
+      el.innerHTML = '<p style="color:#999">图表示例加载失败</p>';
     });
   }, [chart]);
 

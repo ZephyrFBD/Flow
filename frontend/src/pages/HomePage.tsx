@@ -88,7 +88,6 @@ export default function HomePage() {
                   title="完成率"
                   valueRender={() => <><CountUp to={totalNodes ? Math.round((totalCompleted / totalNodes) * 100) : 0} /><span style={{ fontSize: 14, marginLeft: 2 }}>%</span></>}
                   value={totalNodes ? Math.round((totalCompleted / totalNodes) * 100) : 0}
-                  suffix="%"
                 />
               </Card>
             </Col>
