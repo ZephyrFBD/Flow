@@ -1,6 +1,7 @@
-import { Layout, Typography } from 'antd';
+import { Layout, Typography, theme } from 'antd';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { HomeOutlined, SettingOutlined } from '@ant-design/icons';
+import { HomeOutlined, SettingOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -13,6 +14,8 @@ const navItems = [
 
 export default function MainLayout() {
   const location = useLocation();
+  const { isDark, toggle } = useTheme();
+  const { token } = theme.useToken();
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -22,13 +25,13 @@ export default function MainLayout() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 24px',
-          background: '#fff',
-          borderBottom: '1px solid #f0f0f0',
+          background: token.colorBgContainer,
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <Link to="/" style={{ textDecoration: 'none' }}>
-            <Text strong style={{ fontSize: 18 }}>
+            <Text strong style={{ fontSize: 18, color: token.colorText }}>
               Flow
             </Text>
           </Link>
@@ -39,7 +42,7 @@ export default function MainLayout() {
                 to={item.path}
                 style={{
                   textDecoration: 'none',
-                  color: location.pathname === item.path ? '#1677ff' : '#666',
+                  color: location.pathname === item.path ? token.colorPrimary : token.colorTextDescription,
                   fontWeight: location.pathname === item.path ? 600 : 400,
                 }}
               >
@@ -48,11 +51,16 @@ export default function MainLayout() {
             ))}
           </nav>
         </div>
-        <Link to="/settings" style={{ color: '#666' }}>
-          <SettingOutlined style={{ fontSize: 18 }} />
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span onClick={toggle} style={{ cursor: 'pointer', color: token.colorTextDescription, fontSize: 18, lineHeight: 1 }}>
+            {isDark ? <SunOutlined /> : <MoonOutlined />}
+          </span>
+          <Link to="/settings" style={{ color: token.colorTextDescription, lineHeight: 1 }}>
+            <SettingOutlined style={{ fontSize: 18 }} />
+          </Link>
+        </div>
       </Header>
-      <Content style={{ padding: 24, background: '#f5f5f5' }}>
+      <Content style={{ padding: 24, background: token.colorBgLayout }}>
         <Outlet />
       </Content>
     </Layout>

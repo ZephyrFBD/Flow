@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Card, Typography, Input, Button, Select, Space, message, Spin, Alert } from 'antd';
+import { Card, Typography, Input, Button, Select, Space, message, Spin, Alert, Switch } from 'antd';
 import { getConfig, updateProvider, setActiveProvider, getProviders } from '../services/api';
+import { useTheme } from '../contexts/ThemeContext';
 import type { LLMConfig, LLMProviderStatus } from '../types';
 
 const { Title, Text } = Typography;
 
 export default function SettingsPage() {
+  const { isDark, toggle } = useTheme();
   const [config, setConfig] = useState<LLMConfig | null>(null);
   const [statuses, setStatuses] = useState<Record<string, LLMProviderStatus> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,6 +145,14 @@ export default function SettingsPage() {
             {testResult.claude === 'success' && <Alert type="success" message="✅ 连接成功" showIcon style={{ margin: 0 }} />}
             {testResult.claude === 'fail' && <Alert type="error" message="❌ 连接失败" showIcon style={{ margin: 0 }} />}
           </Space>
+        </Space>
+      </Card>
+
+      {/* Appearance */}
+      <Card title="外观" size="small" style={{ marginBottom: 16 }}>
+        <Space>
+          <Text>暗色模式</Text>
+          <Switch checked={isDark} onChange={toggle} checkedChildren="🌙" unCheckedChildren="☀️" />
         </Space>
       </Card>
 

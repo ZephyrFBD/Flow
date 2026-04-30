@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, theme } from 'antd';
 import { AppProvider } from './contexts/AppContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import GeneratePage from './pages/GeneratePage';
@@ -10,10 +11,12 @@ import PracticePage from './pages/PracticePage';
 import ManagePage from './pages/ManagePage';
 import SettingsPage from './pages/SettingsPage';
 
-export default function App() {
+function ThemedApp() {
+  const { isDark } = useTheme();
   return (
     <ConfigProvider
       theme={{
+        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
           colorPrimary: '#1677ff',
           borderRadius: 6,
@@ -36,5 +39,13 @@ export default function App() {
         </BrowserRouter>
       </AppProvider>
     </ConfigProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <ThemedApp />
+    </ThemeProvider>
   );
 }
