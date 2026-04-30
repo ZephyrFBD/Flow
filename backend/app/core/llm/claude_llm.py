@@ -15,6 +15,10 @@ class ClaudeLLM(BaseLLM):
         self._client: AsyncAnthropic | None = None
 
     @property
+    def configured(self) -> bool:
+        return bool(self._api_key)
+
+    @property
     def name(self) -> str:
         return "claude"
 

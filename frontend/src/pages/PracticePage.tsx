@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, Typography, Button, Space, Tag, Progress, Skeleton, Alert } from 'antd';
+import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -8,8 +9,10 @@ import { submitAnswer, parseSSEStream, getTree, updateQuestion } from '../servic
 import type { ExampleQuestion } from '../types';
 import ChoiceQuestion from '../components/ChoiceQuestion';
 import EssayQuestion from '../components/EssayQuestion';
+import GradientText from '../components/GradientText';
+import StarBorder from '../components/StarBorder';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function PracticePage() {
   const { questionId } = useParams<{ questionId: string }>();
@@ -185,46 +188,54 @@ export default function PracticePage() {
         </Card>
       )}
 
-      <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Tag color={question.type === 'choice' ? 'blue' : 'orange'}>
-            {question.type === 'choice' ? '选择题' : '解答题'}
-          </Tag>
-          <Tag>{question.difficulty === 'easy' ? '简单' : question.difficulty === 'hard' ? '困难' : '中等'}</Tag>
-          {wrongMode && <Tag color="red">错题复习</Tag>}
-        </Space>
-        <Title level={4}>{question.question}</Title>
-
-        {question.type === 'choice' && question.options && (
-          <ChoiceQuestion
-            options={question.options}
-            value={userAnswer}
-            onChange={setUserAnswer}
-            disabled={submitted}
-          />
-        )}
-
-        {question.type === 'essay' && (
-          <EssayQuestion
-            value={userAnswer}
-            onChange={setUserAnswer}
-            disabled={submitted}
-          />
-        )}
-
-        {!submitted && (
-          <Space style={{ marginTop: 16 }}>
-            <Button type="primary" size="large" onClick={handleSubmit} loading={evaluating}
-              disabled={!userAnswer.trim()}>
-              提交答案
-            </Button>
-            {evaluating && <Button onClick={() => { abortRef.current?.abort(); setEvaluating(false); }}>取消</Button>}
+      <StarBorder color="#5227FF" speed="10s" thickness={1} as="div">
+        <Card>
+          <Space style={{ marginBottom: 16 }}>
+            <Tag color={question.type === 'choice' ? 'blue' : 'orange'}>
+              {question.type === 'choice' ? '选择题' : '解答题'}
+            </Tag>
+            <Tag>{question.difficulty === 'easy' ? '简单' : question.difficulty === 'hard' ? '困难' : '中等'}</Tag>
+            {wrongMode && <Tag color="red">错题复习</Tag>}
           </Space>
-        )}
-      </Card>
+          <Text strong style={{ fontSize: 18, display: 'block', marginBottom: 16 }}>{question.question}</Text>
+
+          {question.type === 'choice' && question.options && (
+            <ChoiceQuestion
+              options={question.options}
+              value={userAnswer}
+              onChange={setUserAnswer}
+              disabled={submitted}
+            />
+          )}
+
+          {question.type === 'essay' && (
+            <EssayQuestion
+              value={userAnswer}
+              onChange={setUserAnswer}
+              disabled={submitted}
+            />
+          )}
+
+          {!submitted && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Space style={{ marginTop: 16 }}>
+                <Button type="primary" size="large" onClick={handleSubmit} loading={evaluating}
+                  disabled={!userAnswer.trim()}>
+                  提交答案
+                </Button>
+                {evaluating && <Button onClick={() => { abortRef.current?.abort(); setEvaluating(false); }}>取消</Button>}
+              </Space>
+            </motion.div>
+          )}
+        </Card>
+      </StarBorder>
 
       {(evaluating || llmMeta) && (
-        <Card size="small" style={{ marginTop: 8, background: '#f6f8fa' }}>
+        <Card size="small" className="meta-info-card" style={{ marginTop: 8 }}>
           <Text type="secondary" style={{ fontSize: 13 }}>
             {llmMeta ? formatMeta(llmMeta) : formatLive(liveElapsed, liveTokens)}
           </Text>
@@ -232,50 +243,58 @@ export default function PracticePage() {
       )}
 
       {submitted && (
-        <Card style={{ marginTop: 16 }}>
-          {isCorrect !== null && (
-            <Alert type={isCorrect ? 'success' : 'error'} message={isCorrect ? '✅ 正确!' : '❌ 错误'} showIcon style={{ marginBottom: 16 }} />
-          )}
-          {aiScore !== null && (
-            <div style={{ marginBottom: 16 }}>
-              <Text strong>AI 评分: </Text>
-              <Text style={{ fontSize: 20, fontWeight: 700 }}>{aiScore}/10</Text>
-            </div>
-          )}
-          <div style={{ marginBottom: 16 }}>
-            <Text strong>解析:</Text>
-            <div style={{ marginTop: 8 }}>
-              {explanation ? (
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                  {preprocessMath(explanation)}
-                </ReactMarkdown>
-              ) : (
-                <Text>加载中...</Text>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <StarBorder color="#B497CF" speed="12s" thickness={1} as="div">
+            <Card style={{ marginTop: 16 }}>
+              {isCorrect !== null && (
+                <Alert type={isCorrect ? 'success' : 'error'} message={isCorrect ? '✅ 正确!' : '❌ 错误'} showIcon style={{ marginBottom: 16 }} />
               )}
-              {evaluating && <Text type="secondary"> (正在生成...)</Text>}
-            </div>
-          </div>
-          {suggestion && (
-            <div style={{ marginBottom: 16 }}>
-              <Text strong>改进建议:</Text>
-              <div style={{ marginTop: 8 }}>
-                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                  {preprocessMath(suggestion)}
-                </ReactMarkdown>
+              {aiScore !== null && (
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>AI 评分: </Text>
+                  <Text style={{ fontSize: 20, fontWeight: 700 }}>{aiScore}/10</Text>
+                </div>
+              )}
+              <div style={{ marginBottom: 16 }}>
+                <Text strong>解析:</Text>
+                <div style={{ marginTop: 8 }}>
+                  {explanation ? (
+                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                      {preprocessMath(explanation)}
+                    </ReactMarkdown>
+                  ) : (
+                    <Text>加载中...</Text>
+                  )}
+                  {evaluating && <Text type="secondary"> (正在生成...)</Text>}
+                </div>
               </div>
-            </div>
-          )}
-          <Progress percent={isCorrect ? 100 : aiScore !== null ? aiScore * 10 : 0}
-            status={isCorrect ? 'success' : 'exception'} format={(p) => `${p}%`} />
-          <div style={{ marginTop: 16 }}>
-            <div style={{ background: '#f6f8fa', padding: 12, borderRadius: 6 }}>
-              <Text strong>参考答案:</Text>
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {preprocessMath(question.answer)}
-              </ReactMarkdown>
-            </div>
-          </div>
-        </Card>
+              {suggestion && (
+                <div style={{ marginBottom: 16 }}>
+                  <Text strong>改进建议:</Text>
+                  <div style={{ marginTop: 8 }}>
+                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                      {preprocessMath(suggestion)}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
+              <Progress percent={isCorrect ? 100 : aiScore !== null ? aiScore * 10 : 0}
+                status={isCorrect ? 'success' : 'exception'} format={(p) => `${p}%`} />
+              <div style={{ marginTop: 16 }}>
+                <div className="reference-answer">
+                  <Text strong>参考答案:</Text>
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                    {preprocessMath(question.answer)}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </Card>
+          </StarBorder>
+        </motion.div>
       )}
 
       {allQuestions.length > 1 && (

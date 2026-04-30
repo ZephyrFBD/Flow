@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Typography, Space, Checkbox, Tag, Button, Skeleton, Empty, List, message, Input,
 } from 'antd';
+import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -11,8 +12,10 @@ import { getTree, updateNode, generateQuestions, parseSSEStream } from '../servi
 import type { KnowledgeNode, ExampleQuestion, QuestionConfig } from '../types';
 import QuestionForm from '../components/QuestionForm';
 import MermaidChart from '../components/MermaidChart';
+import GradientText from '../components/GradientText';
+import StarBorder from '../components/StarBorder';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const EXAMPLE_DIAGRAMS: Record<string, string> = {
   '矩阵': 'graph LR\n  A[矩阵] --> B[加法]\n  A --> C[乘法]\n  A --> D[转置]\n  B --> E[对应元素相加]\n  C --> F[行×列]',
@@ -173,12 +176,13 @@ export default function NodeDetailPage() {
             <Button size="small" onClick={() => setEditingTitle(false)}>取消</Button>
           </Space>
         ) : (
-          <Title level={3}
-            onClick={() => { setEditTitleVal(node.title); setEditingTitle(true); }}
-            style={{ margin: 0, cursor: 'pointer' }}
-          >
-            {node.title} ✎
-          </Title>
+          <GradientText colors={['#5227FF', '#FF9FFC', '#B497CF']} animationSpeed={6}>
+            <span style={{ fontSize: 24, fontWeight: 700, cursor: 'pointer' }}
+              onClick={() => { setEditTitleVal(node.title); setEditingTitle(true); }}
+            >
+              {node.title} ✎
+            </span>
+          </GradientText>
         )}
         <Checkbox checked={node.completed} onChange={handleToggleComplete}>
           已完成
@@ -232,20 +236,22 @@ export default function NodeDetailPage() {
           </Space>
         </Card>
       ) : (
-        <Card
-          style={{ marginBottom: 16 }}
-          extra={<Button type="link" size="small" onClick={handleStartEditDesc}>编辑</Button>}
-        >
-          <div style={{ fontSize: 15, lineHeight: 1.8, minHeight: 40 }}>
-            {node.description ? (
-              <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                {node.description}
-              </ReactMarkdown>
-            ) : (
-              <Text type="secondary">暂无讲解内容</Text>
-            )}
-          </div>
-        </Card>
+        <StarBorder color="#5227FF" speed="12s" thickness={1} as="div">
+          <Card
+            style={{ marginBottom: 16 }}
+            extra={<Button type="link" size="small" onClick={handleStartEditDesc}>编辑</Button>}
+          >
+            <div style={{ fontSize: 15, lineHeight: 1.8, minHeight: 40 }}>
+              {node.description ? (
+                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                  {node.description}
+                </ReactMarkdown>
+              ) : (
+                <Text type="secondary">暂无讲解内容</Text>
+              )}
+            </div>
+          </Card>
+        </StarBorder>
       )}
 
       {/* Mermaid diagram */}
@@ -258,7 +264,7 @@ export default function NodeDetailPage() {
       <QuestionForm onGenerate={handleGenerateQuestions} loading={generatingQ} />
 
       {(generatingQ || llmMeta) && (
-        <Card size="small" style={{ marginBottom: 16, background: '#f6f8fa' }}>
+        <Card size="small" className="meta-info-card" style={{ marginBottom: 16 }}>
           <Text type="secondary" style={{ fontSize: 13 }}>
             {llmMeta ? formatMeta(llmMeta) : formatLive(liveElapsed, liveTokens)}
           </Text>
@@ -281,32 +287,38 @@ export default function NodeDetailPage() {
         >
           <List
             dataSource={questions}
-            renderItem={(q) => (
-              <List.Item
-                actions={[
-                  <Button key="practice" type="link" onClick={() => {
-                    const params = new URLSearchParams({ treeId: treeId!, nodeId: nodeId! });
-                    navigate(`/practice/${q.id}?${params}`);
-                  }}>
-                    {q.is_correct !== null || q.ai_score !== null ? '继续答题' : '去答题'}
-                  </Button>,
-                ]}
+            renderItem={(q, idx) => (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
               >
-                <List.Item.Meta
-                  title={
-                    <Space>
-                      <Tag color={q.type === 'choice' ? 'blue' : 'orange'}>
-                        {q.type === 'choice' ? '选择题' : '解答题'}
-                      </Tag>
-                      <Text>{q.question}</Text>
-                      {q.is_correct === true && <Tag color="green">✅ 正确</Tag>}
-                      {q.is_correct === false && <Tag color="red">❌ 错误</Tag>}
-                      {q.is_correct === null && q.ai_score !== null && <Tag color="blue">📝 {q.ai_score}/10</Tag>}
-                    </Space>
-                  }
-                  description={q.difficulty === 'easy' ? '简单' : q.difficulty === 'hard' ? '困难' : '中等'}
-                />
-              </List.Item>
+                <List.Item
+                  actions={[
+                    <Button key="practice" type="link" onClick={() => {
+                      const params = new URLSearchParams({ treeId: treeId!, nodeId: nodeId! });
+                      navigate(`/practice/${q.id}?${params}`);
+                    }}>
+                      {q.is_correct !== null || q.ai_score !== null ? '继续答题' : '去答题'}
+                    </Button>,
+                  ]}
+                >
+                  <List.Item.Meta
+                    title={
+                      <Space>
+                        <Tag color={q.type === 'choice' ? 'blue' : 'orange'}>
+                          {q.type === 'choice' ? '选择题' : '解答题'}
+                        </Tag>
+                        <Text>{q.question}</Text>
+                        {q.is_correct === true && <Tag color="green">✅ 正确</Tag>}
+                        {q.is_correct === false && <Tag color="red">❌ 错误</Tag>}
+                        {q.is_correct === null && q.ai_score !== null && <Tag color="blue">📝 {q.ai_score}/10</Tag>}
+                      </Space>
+                    }
+                    description={q.difficulty === 'easy' ? '简单' : q.difficulty === 'hard' ? '困难' : '中等'}
+                  />
+                </List.Item>
+              </motion.div>
             )}
           />
         </Card>

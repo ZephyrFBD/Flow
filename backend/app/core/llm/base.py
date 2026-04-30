@@ -10,6 +10,11 @@ class BaseLLM(ABC):
         self.last_usage: dict | None = None
         self.last_stop_reason: str | None = None
 
+    @property
+    def configured(self) -> bool:
+        """Whether this provider has sufficient config (api_key for remote)."""
+        return True  # overridden in subclasses
+
     @abstractmethod
     async def generate(self, prompt: str, system_prompt: str | None = None) -> str:
         """Generate a complete response (non-streaming)."""

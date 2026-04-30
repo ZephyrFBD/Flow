@@ -2,6 +2,7 @@ import { Layout, Typography, theme } from 'antd';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { HomeOutlined, SettingOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useTheme } from '../contexts/ThemeContext';
+import GradientText from '../components/GradientText';
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -30,10 +31,12 @@ export default function MainLayout() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <Text strong style={{ fontSize: 18, color: token.colorText }}>
-              Flow
-            </Text>
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 18, fontWeight: 700, display: 'inline-flex' }}>
+              <GradientText colors={['#5227FF', '#FF9FFC', '#B497CF']} animationSpeed={6}>
+                Flow
+              </GradientText>
+            </span>
           </Link>
           <nav style={{ display: 'flex', gap: 16 }}>
             {navItems.map((item) => (

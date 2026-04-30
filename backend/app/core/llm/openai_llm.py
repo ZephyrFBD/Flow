@@ -13,6 +13,10 @@ class OpenAILLM(BaseLLM):
         self._client: AsyncOpenAI | None = None
 
     @property
+    def configured(self) -> bool:
+        return bool(self._api_key)
+
+    @property
     def name(self) -> str:
         return "openai"
 

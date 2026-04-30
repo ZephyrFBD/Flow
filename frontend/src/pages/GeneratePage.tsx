@@ -5,9 +5,11 @@ import {
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { generateTree, refineTreeStream, parseSSEStream } from '../services/api';
 import PdfUploader from '../components/PdfUploader';
+import GradientText from '../components/GradientText';
+import StarBorder from '../components/StarBorder';
 
 const { TextArea } = Input;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function GeneratePage() {
   const navigate = useNavigate();
@@ -102,7 +104,11 @@ export default function GeneratePage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <Title level={3}>{refineTreeId ? '✏️ 用AI修改知识树' : '✨ 生成知识树'}</Title>
+      <GradientText colors={['#5227FF', '#FF9FFC', '#B497CF']} animationSpeed={6}>
+        <span style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, display: 'inline-block' }}>
+          {refineTreeId ? '✏️ 用AI修改知识树' : '✨ 生成知识树'}
+        </span>
+      </GradientText>
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         {refineTreeId && (
           <div>
@@ -128,9 +134,13 @@ export default function GeneratePage() {
         </div>
 
         <Space>
-          <Button type="primary" size="large" onClick={handleGenerate} loading={generating} disabled={!prompt && !pdfFile}>
-            {generating ? '生成中...' : refineTreeId ? '✏️ 开始修改' : '✨ 生成知识树'}
-          </Button>
+          <StarBorder color="#5227FF" speed="8s" thickness={1} as="div" style={{ display: 'inline-block' }}>
+            <div style={{ padding: '4px 0' }}>
+              <Button type="primary" size="large" onClick={handleGenerate} loading={generating} disabled={!prompt && !pdfFile}>
+                {generating ? '生成中...' : refineTreeId ? '✏️ 开始修改' : '✨ 生成知识树'}
+              </Button>
+            </div>
+          </StarBorder>
           {generating && <Button onClick={handleCancel}>取消</Button>}
         </Space>
 
@@ -147,7 +157,7 @@ export default function GeneratePage() {
         )}
 
         {(generating || llmMeta) && (
-          <Card size="small" style={{ background: '#f6f8fa' }}>
+          <Card size="small" className="meta-info-card">
             <Text type="secondary" style={{ fontSize: 13 }}>
               {llmMeta ? formatMeta(llmMeta) : formatLive(liveElapsed, liveTokens)}
             </Text>
@@ -157,12 +167,14 @@ export default function GeneratePage() {
         {error && <Alert type="error" message="生成失败" description={error} closable onClose={() => setError(null)} showIcon />}
 
         {treeData.length > 0 && (
-          <Card
-            title={`生成结果预览 (${nodeMap.size} 个节点)`}
-            extra={treeId && <Button type="primary" onClick={() => navigate(`/tree/${treeId}`)}>📖 进入知识树</Button>}
-          >
-            <Tree showLine defaultExpandAll treeData={treeData} />
-          </Card>
+          <StarBorder color="#B497CF" speed="12s" thickness={1} as="div">
+            <Card
+              title={`生成结果预览 (${nodeMap.size} 个节点)`}
+              extra={treeId && <Button type="primary" onClick={() => navigate(`/tree/${treeId}`)}>📖 进入知识树</Button>}
+            >
+              <Tree showLine defaultExpandAll treeData={treeData} />
+            </Card>
+          </StarBorder>
         )}
       </Space>
     </div>

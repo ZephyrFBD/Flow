@@ -4,8 +4,10 @@ import { Card, Button, Typography, Space, Tag, Spin, Empty, Progress, Select, In
 import { getTree, updateNode, listTrees, getSaveUrl } from '../services/api';
 import type { KnowledgeTreeFile, KnowledgeNode, TreeListItem } from '../types';
 import KnowledgeTree from '../components/KnowledgeTree';
+import GradientText from '../components/GradientText';
+import StarBorder from '../components/StarBorder';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function TreePage() {
   const { treeId } = useParams<{ treeId: string }>();
@@ -75,7 +77,9 @@ export default function TreePage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Space>
-          <Title level={3} style={{ margin: 0 }}>{tree.title}</Title>
+          <GradientText colors={['#5227FF', '#FF9FFC', '#B497CF']} animationSpeed={6}>
+            <span style={{ fontSize: 24, fontWeight: 700 }}>{tree.title}</span>
+          </GradientText>
           <Space size="small">
             {versionOptions.length > 1 ? (
               <Select
@@ -125,26 +129,28 @@ export default function TreePage() {
         </Card>
 
         {/* Node details panel */}
-        <Card size="small" style={{ width: 300 }}>
-          {found ? (
-            <div>
-              <Title level={5}>{found.title}</Title>
-              <Text>{found.description || '暂无描述'}</Text>
-              {found.keywords && found.keywords.length > 0 && (
-                <div style={{ marginTop: 12 }}>
-                  {found.keywords.map((kw) => <Tag key={kw}>{kw}</Tag>)}
-                </div>
-              )}
-              <Space style={{ marginTop: 16 }}>
-                <Button type="primary" size="small" onClick={() => navigate(`/node/${treeId}/${selectedNode}`)}>
-                  📖 查看详解
-                </Button>
-              </Space>
-            </div>
-          ) : (
-            <Empty description="选择一个节点查看详情" />
-          )}
-        </Card>
+        <StarBorder color="#B497CF" speed="12s" thickness={1} as="div">
+          <Card size="small" style={{ width: 300 }}>
+            {found ? (
+              <div>
+                <Text strong style={{ fontSize: 16, display: 'block', marginBottom: 8 }}>{found.title}</Text>
+                <Text>{found.description || '暂无描述'}</Text>
+                {found.keywords && found.keywords.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    {found.keywords.map((kw) => <Tag key={kw}>{kw}</Tag>)}
+                  </div>
+                )}
+                <Space style={{ marginTop: 16 }}>
+                  <Button type="primary" size="small" onClick={() => navigate(`/node/${treeId}/${selectedNode}`)}>
+                    📖 查看详解
+                  </Button>
+                </Space>
+              </div>
+            ) : (
+              <Empty description="选择一个节点查看详情" />
+            )}
+          </Card>
+        </StarBorder>
       </div>
     </div>
   );

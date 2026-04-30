@@ -120,10 +120,18 @@ class TreeService:
                             provider: str | None = None) -> KnowledgeTreeFile:
         """Generate a new knowledge tree (non-streaming)."""
         llm = LLMService.get_instance()
-        active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        try:
+            active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        except ValueError as e:
+            raise ValueError(str(e))
+        if not active.configured:
+            raise ValueError(f"{active.name} 未配置 API Key，请在设置中配置")
         full_prompt = self._build_full_prompt(prompt, pdf_text)
 
-        response = await active.generate(full_prompt, TREE_GENERATE_SYSTEM_PROMPT)
+        try:
+            response = await active.generate(full_prompt, TREE_GENERATE_SYSTEM_PROMPT)
+        except Exception as e:
+            raise ValueError(f"LLM 调用失败: {str(e)}")
         root = self._parse_tree_response(response)
 
         tree = KnowledgeTreeFile(
@@ -176,7 +184,14 @@ class TreeService:
                                     provider: str | None = None) -> AsyncIterator[str]:
         """Stream tree generation as SSE events."""
         llm = LLMService.get_instance()
-        active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        try:
+            active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        except ValueError as e:
+            yield f'event: error\ndata: {json.dumps({"message": str(e)})}\n\n'
+            return
+        if not active.configured:
+            yield f'event: error\ndata: {json.dumps({"message": f"{active.name} 未配置 API Key，请在设置中配置"})}\n\n'
+            return
         full_prompt = self._build_full_prompt(prompt, pdf_text)
 
         yield 'event: progress\ndata: {"phase": "generating", "percent": 10}\n\n'
@@ -184,14 +199,22 @@ class TreeService:
         llm_start = time.time()
         buffer = ""
         last_token_emit = 0
-        async for chunk in active.generate_stream(full_prompt, TREE_GENERATE_SYSTEM_PROMPT):
-            buffer += chunk
-            now = time.time()
-            if now - last_token_emit >= 0.5:
-                last_token_emit = now
-                estimated = len(buffer) // 4
-                yield f'event: token_progress\ndata: {json.dumps({"chars": len(buffer), "estimated_tokens": estimated, "elapsed": round(now - llm_start, 1)})}\n\n'
+        try:
+            async for chunk in active.generate_stream(full_prompt, TREE_GENERATE_SYSTEM_PROMPT):
+                buffer += chunk
+                now = time.time()
+                if now - last_token_emit >= 0.5:
+                    last_token_emit = now
+                    estimated = len(buffer) // 4
+                    yield f'event: token_progress\ndata: {json.dumps({"chars": len(buffer), "estimated_tokens": estimated, "elapsed": round(now - llm_start, 1)})}\n\n'
+        except Exception as e:
+            yield f'event: error\ndata: {json.dumps({"message": f"LLM 调用失败: {str(e)}"})}\n\n'
+            return
         llm_elapsed = time.time() - llm_start
+
+        if not buffer.strip():
+            yield f'event: error\ndata: {json.dumps({"message": "LLM 返回为空，请检查 API Key 和模型配置"})}\n\n'
+            return
 
         yield 'event: progress\ndata: {"phase": "parsing", "percent": 60}\n\n'
 
@@ -241,7 +264,12 @@ class TreeService:
             raise ValueError(f"Tree {tree_id} not found")
 
         llm = LLMService.get_instance()
-        active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        try:
+            active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        except ValueError as e:
+            raise ValueError(str(e))
+        if not active.configured:
+            raise ValueError(f"{active.name} 未配置 API Key，请在设置中配置")
 
         combined = new_prompt
         if pdf_text:
@@ -250,7 +278,10 @@ class TreeService:
         existing_json = existing.nodes.model_dump_json(indent=2)
         refine_prompt = f"Existing tree:\n{existing_json}\n\nNew input:\n{combined}"
 
-        response = await active.generate(refine_prompt, TREE_REFINE_SYSTEM_PROMPT)
+        try:
+            response = await active.generate(refine_prompt, TREE_REFINE_SYSTEM_PROMPT)
+        except Exception as e:
+            raise ValueError(f"LLM 调用失败: {str(e)}")
         root = self._parse_tree_response(response)
 
         if mode == "derive":
@@ -299,7 +330,14 @@ class TreeService:
             return
 
         llm = LLMService.get_instance()
-        active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        try:
+            active = llm.get_provider(provider) if provider else llm.get_active_provider()
+        except ValueError as e:
+            yield f'event: error\ndata: {json.dumps({"message": str(e)})}\n\n'
+            return
+        if not active.configured:
+            yield f'event: error\ndata: {json.dumps({"message": f"{active.name} 未配置 API Key，请在设置中配置"})}\n\n'
+            return
 
         combined = new_prompt
         if pdf_text:
@@ -313,14 +351,22 @@ class TreeService:
         llm_start = time.time()
         buffer = ""
         last_token_emit = 0
-        async for chunk in active.generate_stream(refine_prompt, TREE_REFINE_SYSTEM_PROMPT):
-            buffer += chunk
-            now = time.time()
-            if now - last_token_emit >= 0.5:
-                last_token_emit = now
-                estimated = len(buffer) // 4
-                yield f'event: token_progress\ndata: {json.dumps({"chars": len(buffer), "estimated_tokens": estimated, "elapsed": round(now - llm_start, 1)})}\n\n'
+        try:
+            async for chunk in active.generate_stream(refine_prompt, TREE_REFINE_SYSTEM_PROMPT):
+                buffer += chunk
+                now = time.time()
+                if now - last_token_emit >= 0.5:
+                    last_token_emit = now
+                    estimated = len(buffer) // 4
+                    yield f'event: token_progress\ndata: {json.dumps({"chars": len(buffer), "estimated_tokens": estimated, "elapsed": round(now - llm_start, 1)})}\n\n'
+        except Exception as e:
+            yield f'event: error\ndata: {json.dumps({"message": f"LLM 调用失败: {str(e)}"})}\n\n'
+            return
         llm_elapsed = time.time() - llm_start
+
+        if not buffer.strip():
+            yield f'event: error\ndata: {json.dumps({"message": "LLM 返回为空，请检查 API Key 和模型配置"})}\n\n'
+            return
 
         yield 'event: progress\ndata: {"phase": "parsing", "percent": 60}\n\n'
 

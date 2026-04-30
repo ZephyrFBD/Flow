@@ -4,8 +4,10 @@ import { Card, Typography, Button, Tag, List, Space, Skeleton, Empty, Input, mes
 import { getTree, updateNode, deleteNode, addNode, listTrees } from '../services/api';
 import type { KnowledgeTreeFile, KnowledgeNode, TreeListItem } from '../types';
 import VersionGraph from '../components/VersionGraph';
+import GradientText from '../components/GradientText';
+import StarBorder from '../components/StarBorder';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function ManagePage() {
   const { treeId } = useParams<{ treeId: string }>();
@@ -71,22 +73,25 @@ export default function ManagePage() {
   return (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
       <Button type="link" onClick={() => navigate(`/tree/${treeId}`)} style={{ marginBottom: 16 }}>← 返回知识树</Button>
-      <Title level={3}>🌿 管理 · {tree.title}</Title>
+      <GradientText colors={['#5227FF', '#FF9FFC', '#B497CF']} animationSpeed={6}>
+        <span style={{ fontSize: 24, fontWeight: 700 }}>🌿 管理 · {tree.title}</span>
+      </GradientText>
 
       <VersionGraph currentTreeId={treeId!} allTrees={allTrees} onNavigate={(tid) => navigate(`/manage/${tid}`)} />
 
-      <div style={{ display: 'flex', gap: 16 }}>
-        <Card title="节点列表" size="small" style={{ flex: 1 }}>
+      <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+        <StarBorder color="#B497CF" speed="12s" thickness={1} as="div" style={{ flex: 1 }}>
+          <Card title="节点列表" size="small">
           <List
             size="small"
             dataSource={flatNodes}
             renderItem={(node) => (
               <List.Item
                 onClick={() => handleSelectNode(node)}
-                style={{ cursor: 'pointer', background: editingNode?.id === node.id ? '#e6f4ff' : undefined, padding: '4px 12px' }}
+                style={{ cursor: 'pointer', background: editingNode?.id === node.id ? 'var(--selected-bg, #e6f4ff)' : undefined, padding: '4px 12px' }}
               >
                 <Space>
-                  <Text style={{ fontSize: 12, color: '#999' }}>{node.id}</Text>
+                  <Text style={{ fontSize: 12, color: 'var(--text-secondary, #999)' }}>{node.id}</Text>
                   <Text delete={!node.title}>{node.title || '(未命名)'}</Text>
                   {node.completed && <Tag color="green" style={{ fontSize: 10 }}>完成</Tag>}
                 </Space>
@@ -94,8 +99,10 @@ export default function ManagePage() {
             )}
           />
         </Card>
+        </StarBorder>
 
-        <Card title="编辑节点" size="small" style={{ width: 400 }}
+        <StarBorder color="#FF9FFC" speed="12s" thickness={1} as="div">
+          <Card title="编辑节点" size="small" style={{ width: 400 }}
           extra={editingNode && <Popconfirm title="确认删除?" onConfirm={() => handleDeleteNode(editingNode.id)}><Button danger size="small">删除</Button></Popconfirm>}
         >
           {editingNode ? (
@@ -106,7 +113,7 @@ export default function ManagePage() {
                 <div><Text strong>关键词: </Text>{editingNode.keywords.map((kw) => <Tag key={kw}>{kw}</Tag>)}</div>
               )}
               <Button type="primary" onClick={handleSaveNode}>💾 保存修改</Button>
-              <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12, marginTop: 12 }}>
+              <div style={{ borderTop: '1px solid var(--border-color, #f0f0f0)', paddingTop: 12, marginTop: 12 }}>
                 <Text strong>添加子节点</Text>
                 <Space style={{ marginTop: 8 }}>
                   <Input placeholder="节点标题" value={addingTitle} onChange={(e) => setAddingTitle(e.target.value)} />
@@ -115,13 +122,15 @@ export default function ManagePage() {
               </div>
             </Space>
           ) : <Text type="secondary">选择一个节点进行编辑</Text>}
-        </Card>
+          </Card>
+        </StarBorder>
       </div>
 
       {tree.prompt_history.length > 0 && (
-        <Card title="Prompt 历史" size="small" style={{ marginTop: 16 }}>
+        <StarBorder color="#B497CF" speed="12s" thickness={1} as="div">
+          <Card title="Prompt 历史" size="small" style={{ marginTop: 16 }}>
           {tree.prompt_history.map((record, idx) => (
-            <div key={idx} style={{ padding: '4px 0', borderBottom: '1px solid #f5f5f5' }}>
+            <div key={idx} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-color, #f5f5f5)' }}>
               <Space>
                 <Tag color={record.mode === 'generate' ? 'blue' : 'orange'}>{record.mode === 'generate' ? '生成' : '精炼'}</Tag>
                 <Text type="secondary">{record.timestamp}</Text>
@@ -129,7 +138,8 @@ export default function ManagePage() {
               {record.prompt_text && <div style={{ marginTop: 4 }}><Text>{record.prompt_text}</Text></div>}
             </div>
           ))}
-        </Card>
+          </Card>
+        </StarBorder>
       )}
     </div>
   );

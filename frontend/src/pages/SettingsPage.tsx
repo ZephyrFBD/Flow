@@ -3,8 +3,10 @@ import { Card, Typography, Input, Button, Select, Space, message, Spin, Alert, S
 import { getConfig, updateProvider, setActiveProvider, getProviders } from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
 import type { LLMConfig, LLMProviderStatus } from '../types';
+import GradientText from '../components/GradientText';
+import BorderGlow from '../components/ui/BorderGlow';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function SettingsPage() {
   const { isDark, toggle } = useTheme();
@@ -80,20 +82,25 @@ export default function SettingsPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <Title level={3}>⚙️ 设置</Title>
+      <GradientText colors={['#5227FF', '#FF9FFC', '#B497CF']} animationSpeed={6}>
+        <span style={{ fontSize: 24, fontWeight: 700, marginBottom: 16, display: 'inline-block' }}>⚙️ 设置</span>
+      </GradientText>
 
-      <Card title="默认模型" size="small" style={{ marginBottom: 16 }}>
-        <Select value={config?.active_provider} onChange={handleSwitchProvider} style={{ width: 200 }}
-          options={[
-            { value: 'openai', label: 'OpenAI' },
-            { value: 'claude', label: 'Claude' },
-            { value: 'ollama', label: 'Ollama' },
-          ]}
-        />
-      </Card>
+      <BorderGlow colors={['#5227FF', '#FF9FFC', '#B497CF']} borderRadius={20}>
+        <Card title="默认模型" size="small">
+          <Select value={config?.active_provider} onChange={handleSwitchProvider} style={{ width: 200 }}
+            options={[
+              { value: 'openai', label: 'OpenAI' },
+              { value: 'claude', label: 'Claude' },
+              { value: 'ollama', label: 'Ollama' },
+            ]}
+          />
+        </Card>
+      </BorderGlow>
 
       {/* OpenAI */}
-      <Card title="OpenAI" size="small" style={{ marginBottom: 16 }}>
+      <BorderGlow colors={['#FF9FFC', '#5227FF', '#B497CF']} borderRadius={20}>
+        <Card title="OpenAI" size="small">
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
             <Text>API Key</Text>
@@ -119,9 +126,11 @@ export default function SettingsPage() {
           </Space>
         </Space>
       </Card>
+      </BorderGlow>
 
       {/* Claude */}
-      <Card title="Claude (Anthropic)" size="small" style={{ marginBottom: 16 }}>
+      <BorderGlow colors={['#B497CF', '#5227FF', '#FF9FFC']} borderRadius={20}>
+        <Card title="Claude (Anthropic)" size="small">
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
             <Text>API Key</Text>
@@ -147,17 +156,21 @@ export default function SettingsPage() {
           </Space>
         </Space>
       </Card>
+      </BorderGlow>
 
       {/* Appearance */}
-      <Card title="外观" size="small" style={{ marginBottom: 16 }}>
+      <BorderGlow colors={['#FF9FFC', '#5227FF', '#B497CF']} borderRadius={20}>
+        <Card title="外观" size="small">
         <Space>
           <Text>暗色模式</Text>
           <Switch checked={isDark} onChange={toggle} checkedChildren="🌙" unCheckedChildren="☀️" />
         </Space>
       </Card>
+      </BorderGlow>
 
       {/* Ollama */}
-      <Card title="Ollama (本地)" size="small">
+      <BorderGlow colors={['#B497CF', '#5227FF', '#FF9FFC']} borderRadius={20}>
+        <Card title="Ollama (本地)" size="small">
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
             <Text>API URL</Text>
@@ -179,6 +192,7 @@ export default function SettingsPage() {
           </Space>
         </Space>
       </Card>
+      </BorderGlow>
     </div>
   );
 }
